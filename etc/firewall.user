@@ -1,0 +1,53 @@
+# This file is interpreted as shell script.
+# Put your custom iptables rules here, they will
+# be executed with each firewall (re-)start.
+
+# Internal uci firewall chains are flushed and recreated on reload, so
+# put custom rules into the root chains e.g. INPUT or FORWARD or into the
+# special user chains, e.g. input_wan_rule or postrouting_lan_rule.
+
+# CLASH-REDIR TCP
+iptables -t nat -N CLASH_TCP
+
+# Bypass ssserver and LAN
+iptables -t nat -A CLASH_TCP -s localhost -j RETURN
+# iptables -t nat -A CLASH_TCP -d shadosocks_server_host_or_ip -j RETURN
+# iptables -t nat -A CLASH_TCP -d another_shadosocks_server_host_or_ip -j RETURN
+
+iptables -t nat -A CLASH_TCP -d 0.0.0.0/8 -j RETURN
+iptables -t nat -A CLASH_TCP -d 10.0.0.0/8 -j RETURN
+iptables -t nat -A CLASH_TCP -d 127.0.0.0/8 -j RETURN
+iptables -t nat -A CLASH_TCP -d 169.254.0.0/16 -j RETURN
+iptables -t nat -A CLASH_TCP -d 172.16.0.0/12 -j RETURN
+iptables -t nat -A CLASH_TCP -d 192.168.0.0/16 -j RETURN
+iptables -t nat -A CLASH_TCP -d 224.0.0.0/4 -j RETURN
+iptables -t nat -A CLASH_TCP -d 240.0.0.0/4 -j RETURN
+
+# Redirect TCP
+iptables -t nat -A CLASH_TCP -p tcp -j REDIRECT --to-ports 7892
+
+# CLASH_UDP
+ip rule add fwmark 1 table 100
+ip route add local 0.0.0.0/0 dev lo table 100
+iptables -t mangle -N CLASH_UDP
+
+# Bypass ssserver and LAN
+iptables -t mangle -A CLASH_UDP -s localhost -j RETURN
+# iptables -t mangle -A CLASH_UDP -d shadosocks_server_host_or_ip -j RETURN
+# iptables -t mangle -A CLASH_UDP -d another_shadosocks_server_host_or_ip -j RETURN
+
+iptables -t mangle -A CLASH_UDP -d 0.0.0.0/8 -j RETURN
+iptables -t mangle -A CLASH_UDP -d 10.0.0.0/8 -j RETURN
+iptables -t mangle -A CLASH_UDP -d 127.0.0.0/8 -j RETURN
+iptables -t mangle -A CLASH_UDP -d 169.254.0.0/16 -j RETURN
+iptables -t mangle -A CLASH_UDP -d 172.16.0.0/12 -j RETURN
+iptables -t mangle -A CLASH_UDP -d 192.168.0.0/16 -j RETURN
+iptables -t mangle -A CLASH_UDP -d 224.0.0.0/4 -j RETURN
+iptables -t mangle -A CLASH_UDP -d 240.0.0.0/4 -j RETURN
+
+# Redirect UDP
+iptables -t mangle -A CLASH_UDP -p udp -j TPROXY --on-port 7892 --tproxy-mark 1
+
+# Enable
+iptables -t mangle -A PREROUTING -p udp -j CLASH_UDP
+iptables -t nat -A PREROUTING -p tcp -j CLASH_TCP
