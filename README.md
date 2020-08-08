@@ -46,7 +46,7 @@ opkg install openssh-sftp-server
 
 ### 6.安装 Clash
 
-版本为 [`clash-linux-mipsle-softfloat-v1.0.0`](https://github.com/Dreamacro/clash/releases/download/v1.0.0/clash-linux-mipsle-softfloat-v1.0.0.gz)
+版本为 [`clash-linux-mipsle-softfloat-2020.06.27`](https://github.com/Dreamacro/clash/releases/download/premium/clash-linux-mipsle-softfloat-2020.06.27.gz)
 
 ```yaml
 # config.yaml
